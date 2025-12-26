@@ -157,7 +157,7 @@ export default function Home() {
               </div>
               <div>
                 <div className="font-semibold">Bin Collection Calendar</div>
-                <div className="text-sm text-slate-300">Dover District Council</div>
+                <div className="text-sm text-slate-300">For the Dover District area</div>
               </div>
             </div>
           </div>
