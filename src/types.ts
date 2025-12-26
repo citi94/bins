@@ -44,7 +44,6 @@ export interface CollectionOverride {
 
 export interface CalendarEvent {
   date: Date;
-  serviceName: string;
   isOverride: boolean;
 }
 

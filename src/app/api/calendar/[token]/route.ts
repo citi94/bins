@@ -53,30 +53,30 @@ export async function GET(
 
     for (const collection of collections) {
       // Generate dates for the next 3 months based on pattern
-      const dates = generateCollectionDates(
+      // This now returns { date, isOverride } with proper pattern-based calculation
+      const generatedDates = generateCollectionDates(
         collection.nextCollection,
         collection.schedule,
         3
       );
 
-      // Apply any overrides
+      // Apply any additional overrides from database (for future holiday shifts
+      // detected by daily refresh that aren't reflected in nextCollection yet)
       const serviceOverrides = overrideMap.get(collection.serviceName) || new Map();
-      const events: CalendarEvent[] = dates.map(date => {
-        const dateKey = formatDateKey(date);
-        const override = serviceOverrides.get(dateKey);
+      const events: CalendarEvent[] = generatedDates.map(item => {
+        const dateKey = formatDateKey(item.date);
+        const dbOverride = serviceOverrides.get(dateKey);
 
-        if (override) {
+        if (dbOverride) {
           return {
-            date: override,
-            serviceName: collection.serviceName,
+            date: dbOverride,
             isOverride: true,
           };
         }
 
         return {
-          date,
-          serviceName: collection.serviceName,
-          isOverride: false,
+          date: item.date,
+          isOverride: item.isOverride,
         };
       });
 

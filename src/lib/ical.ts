@@ -78,8 +78,25 @@ export function generateICalendar(
     }
   }
 
+  // Check if property has food collection service
+  const hasFood = events.some(e => e.serviceName === 'Food Collection');
+
   // Generate one event per day
   for (const [dateKey, dayEvent] of eventsByDate) {
+    const nonFoodServices = dayEvent.services.filter(s => s !== 'Food Collection');
+
+    // Skip food-only days - food is always collected alongside other bins
+    if (nonFoodServices.length === 0) {
+      continue;
+    }
+
+    // Food goes out every week, so add it to any collection day that's missing it
+    // (This handles the case where food's calculated dates don't align with other bins
+    // due to holiday-adjusted start dates)
+    if (hasFood && !dayEvent.services.includes('Food Collection')) {
+      dayEvent.services.push('Food Collection');
+    }
+
     lines.push(...generateDayEvent(dayEvent.services, dayEvent.date, dayEvent.hasOverride, options.uprn));
   }
 
