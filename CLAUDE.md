@@ -46,20 +46,23 @@ See `schema.sql`. Three tables:
 - `collections` - current schedule per service (refreshed daily)
 - `collection_overrides` - detected holiday adjustments
 
-## Outstanding Tasks (Dec 2025)
+## Security & Compliance (Dec 2025)
 
-See `SECURITY_REVIEW.md` for full details. Priority items:
+All security review items have been implemented. See `SECURITY_REVIEW.md` for details.
 
-1. Add Privacy Policy page
-2. Add data deletion mechanism (GDPR right to erasure)
-3. Fix timezone handling (use explicit UK timezone in date parsing)
-4. Add rate limiting on API endpoints
-5. Hash UPRN in calendar event UIDs
-6. Add UPRN format validation (10-12 digit numeric)
-7. Truncate address in calendar name (postcode only)
-8. Add Terms of Service page
-9. Add iCal line folding (RFC 5545 - max 75 chars)
-10. Handle stale/past dates from council site
+**Completed:**
+- Privacy Policy (`/privacy`) and Terms of Service (`/terms`) pages
+- Data deletion via `/api/calendar/[token]/delete`
+- Rate limiting on all API endpoints (`src/lib/rate-limit.ts`)
+- UPRN hashed in calendar event UIDs (SHA256)
+- UPRN format validation (10-12 digit numeric)
+- RFC 5545 compliant iCal output (75-byte line folding)
+- Timezone-safe date handling (noon UTC)
+- Stale date handling (advances past dates to today)
+
+## Privacy Model
+
+This service caches publicly available property data from Dover District Council's website. The data stored (address, postcode, collection schedule) is public information about properties, not personal data about individuals. Calendar tokens are anonymous access keys to cached property data - they are not linked to any user identity.
 
 ## Future Enhancement: Apple Intelligence
 

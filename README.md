@@ -62,4 +62,13 @@ The `netlify.toml` configures:
 
 ## Data Source
 
-Collection data is scraped from [collections.dover.gov.uk](https://collections.dover.gov.uk). This is an unofficial service.
+Collection data is scraped from [collections.dover.gov.uk](https://collections.dover.gov.uk). This is an independent, unofficial service - not affiliated with or endorsed by Dover District Council.
+
+## Privacy
+
+This service caches publicly available property data. No personal information is collected. See `/privacy` for details. Data can be removed by visiting your calendar URL and appending `/delete`.
+
+## Legal
+
+- [Privacy Policy](/privacy)
+- [Terms of Service](/terms)

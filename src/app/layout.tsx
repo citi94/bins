@@ -14,7 +14,24 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Dover Bin Collection Calendar",
-  description: "Subscribe to your Dover District Council bin collection dates. Get automatic updates when dates change for bank holidays.",
+  description: "Subscribe to your bin collection dates as a calendar. Works with Apple Calendar, Google Calendar, and Outlook. Automatic updates for bank holiday changes.",
+  metadataBase: new URL('https://doverbins.netlify.app'),
+  openGraph: {
+    title: "Dover Bin Collection Calendar",
+    description: "Never miss a bin day again. Subscribe to your collection dates and get automatic updates when dates change for bank holidays.",
+    type: "website",
+    locale: "en_GB",
+  },
+  twitter: {
+    card: "summary",
+    title: "Dover Bin Collection Calendar",
+    description: "Never miss a bin day again. Subscribe to your collection dates and get automatic updates for bank holidays.",
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({
