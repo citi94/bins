@@ -111,11 +111,11 @@ function generateDayEvent(
   // Build description with bin details
   const binDetails = serviceNames
     .map(name => SERVICE_DESCRIPTIONS[name] || name)
-    .join('\\n');
+    .join('\n');
 
   const description = hasOverride
-    ? `Put out:\\n${binDetails}\\n\\nNote: Date changed due to bank holiday.`
-    : `Put out:\\n${binDetails}`;
+    ? `Put out:\n${binDetails}\n\nNote: Date changed due to bank holiday.`
+    : `Put out:\n${binDetails}`;
 
   return [
     'BEGIN:VEVENT',
