@@ -190,7 +190,7 @@ export default function Home() {
                     setError(null);
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
-                  placeholder="e.g. CT14 6AD"
+                  placeholder="Enter postcode"
                   className="flex-1 px-4 py-3 text-base rounded-lg border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition-all text-slate-900 placeholder:text-slate-400"
                   disabled={loading}
                 />
