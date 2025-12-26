@@ -1,4 +1,4 @@
-import { neon } from '@netlify/neon';
+import { neon } from '@neondatabase/serverless';
 import { v4 as uuidv4 } from 'uuid';
 import type { Subscription, Collection, CollectionOverride, CollectionService } from '@/types';
 

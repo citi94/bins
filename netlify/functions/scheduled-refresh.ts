@@ -1,5 +1,5 @@
 import type { Config, Context } from '@netlify/functions';
-import { neon } from '@netlify/neon';
+import { neon } from '@neondatabase/serverless';
 import * as cheerio from 'cheerio';
 import { addDays } from 'date-fns';
 
