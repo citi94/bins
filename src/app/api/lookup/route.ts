@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { lookupAddresses } from '@/lib/scraper';
 
+// Dover District Council covers these postcode areas
+// CT13 (Sandwich), CT14 (Deal/Walmer), CT15, CT16, CT17 (Dover)
+// Also some properties in CT1, CT3, CT4 on the district boundary
+const DOVER_DISTRICT_PREFIXES = ['CT13', 'CT14', 'CT15', 'CT16', 'CT17', 'CT1', 'CT3', 'CT4'];
+
+function isDoverDistrictPostcode(postcode: string): boolean {
+  const normalized = postcode.replace(/\s/g, '').toUpperCase();
+  return DOVER_DISTRICT_PREFIXES.some(prefix => normalized.startsWith(prefix));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -21,6 +31,14 @@ export async function POST(request: NextRequest) {
     if (!postcodeRegex.test(normalizedPostcode)) {
       return NextResponse.json(
         { error: 'Invalid UK postcode format' },
+        { status: 400 }
+      );
+    }
+
+    // Check if postcode is in Dover District area
+    if (!isDoverDistrictPostcode(normalizedPostcode)) {
+      return NextResponse.json(
+        { error: 'This service is only available for Dover District Council addresses (CT13-CT17 postcodes)' },
         { status: 400 }
       );
     }
