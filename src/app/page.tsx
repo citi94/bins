@@ -408,20 +408,22 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-8 text-center text-sm text-slate-600">
-          <p>
-            Collection data sourced from{' '}
-            <a
-              href="https://collections.dover.gov.uk"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              Dover District Council
-            </a>
-          </p>
-          <p className="mt-1 text-slate-500">
-            This is an unofficial service. Calendar updates daily at 6am.
+        <footer className="mt-8 text-sm text-slate-600">
+          <div className="bg-slate-100 rounded-lg p-4 mb-4">
+            <p className="font-medium text-slate-700 mb-2">Disclaimer</p>
+            <p className="text-slate-600 text-xs leading-relaxed">
+              This is an independent service and is not affiliated with, endorsed by, or authorised by Dover District Council.
+              All collection schedule data is the property of Dover District Council and is sourced from their{' '}
+              <a href="https://collections.dover.gov.uk" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                public website
+              </a>.
+              This service simply reformats publicly available information into a calendar subscription format for personal convenience.
+              For official information, please visit the Council&apos;s website directly.
+              No warranty is provided — always check official sources before putting bins out.
+            </p>
+          </div>
+          <p className="text-center text-slate-500">
+            Calendar refreshes daily at 6am to detect schedule changes.
           </p>
         </footer>
       </div>
