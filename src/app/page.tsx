@@ -172,10 +172,10 @@ export default function Home() {
           {step === 'input' && (
             <div className="p-6 md:p-8">
               <h1 className="text-2xl font-semibold text-slate-900 mb-2">
-                Subscribe to collection reminders
+                Bin collection calendar
               </h1>
               <p className="text-slate-600 mb-6">
-                Get a calendar feed that automatically updates with your bin collection dates, including bank holiday changes.
+                Get a calendar that automatically updates with collection dates for your address, including bank holiday changes.
               </p>
 
               <label htmlFor="postcode-input" className="block text-sm font-medium text-slate-900 mb-2">
@@ -266,10 +266,10 @@ export default function Home() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Creating calendar...
+                      Generating calendar...
                     </span>
                   ) : (
-                    'Get calendar subscription'
+                    'Get calendar'
                   )}
                 </button>
               )}
@@ -294,7 +294,7 @@ export default function Home() {
                     </svg>
                   </div>
                   <div>
-                    <h2 className="text-lg font-semibold">Calendar subscription ready</h2>
+                    <h2 className="text-lg font-semibold">Calendar ready</h2>
                     <p className="text-green-100 text-sm">Add this URL to your calendar app</p>
                   </div>
                 </div>
@@ -405,7 +405,7 @@ export default function Home() {
                   onClick={reset}
                   className="w-full py-3 text-slate-600 hover:text-slate-900 text-sm font-medium transition-colors border border-slate-200 rounded-lg hover:bg-slate-50"
                 >
-                  Subscribe another address
+                  Get calendar for another address
                 </button>
               </div>
             </div>
