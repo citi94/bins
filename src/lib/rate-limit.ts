@@ -84,9 +84,23 @@ export function checkRateLimit(
 
 /**
  * Get client IP from request headers
+ * IMPORTANT: Check trusted headers first to prevent IP spoofing
  */
 export function getClientIP(request: Request): string {
-  // Check various headers for real IP (reverse proxy scenarios)
+  // Netlify-specific header - cannot be spoofed by client
+  // This MUST be checked first as X-Forwarded-For can be faked
+  const netlifyIP = request.headers.get('x-nf-client-connection-ip');
+  if (netlifyIP) {
+    return netlifyIP;
+  }
+
+  // Cloudflare header (if using CF in front)
+  const cfIP = request.headers.get('cf-connecting-ip');
+  if (cfIP) {
+    return cfIP;
+  }
+
+  // Fallback to X-Forwarded-For (less trusted, can be spoofed)
   const forwarded = request.headers.get('x-forwarded-for');
   if (forwarded) {
     return forwarded.split(',')[0].trim();
@@ -95,12 +109,6 @@ export function getClientIP(request: Request): string {
   const realIP = request.headers.get('x-real-ip');
   if (realIP) {
     return realIP;
-  }
-
-  // Netlify-specific header
-  const netlifyIP = request.headers.get('x-nf-client-connection-ip');
-  if (netlifyIP) {
-    return netlifyIP;
   }
 
   // Fallback - won't work in serverless but provides a default

@@ -94,11 +94,13 @@ export async function GET(
     });
 
     // Return iCal with proper headers
+    // Use postcode in filename instead of UPRN to avoid property identification
+    const safePostcode = subscription.postcode.replace(/\s+/g, '');
     return new NextResponse(icalContent, {
       status: 200,
       headers: {
         'Content-Type': 'text/calendar; charset=utf-8',
-        'Content-Disposition': `attachment; filename="bins-${subscription.uprn}.ics"`,
+        'Content-Disposition': `attachment; filename="bins-${safePostcode}.ics"`,
         // Allow calendar apps to refresh periodically
         'Cache-Control': 'public, max-age=3600', // 1 hour cache
       },

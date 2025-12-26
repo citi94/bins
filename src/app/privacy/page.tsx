@@ -33,6 +33,14 @@ export default function PrivacyPolicy() {
             <p className="text-sm text-slate-500">Last updated: December 2025</p>
 
             <section>
+              <h2 className="text-lg font-semibold text-slate-900 mt-6 mb-3">Data controller</h2>
+              <p>
+                This service is operated as an independent personal project. For data protection
+                enquiries, please use the contact methods provided at the end of this policy.
+              </p>
+            </section>
+
+            <section>
               <h2 className="text-lg font-semibold text-slate-900 mt-6 mb-3">What data we collect</h2>
               <p>When you subscribe to bin collection reminders, we store:</p>
               <ul className="list-disc pl-5 space-y-1 mt-2">
@@ -41,6 +49,22 @@ export default function PrivacyPolicy() {
                 <li><strong>Postcode</strong> - used to look up your address</li>
                 <li><strong>Calendar token</strong> - a random ID used to access your calendar</li>
                 <li><strong>Collection schedule</strong> - bin types and collection dates for your property</li>
+              </ul>
+              <p className="mt-3">We do not collect your name, email address, IP address, or any personal identifiers.</p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-slate-900 mt-6 mb-3">Lawful basis for processing</h2>
+              <p>
+                We process your data under <strong>legitimate interests</strong> (UK GDPR Article 6(1)(f)).
+                The processing is necessary to provide the calendar subscription service you requested.
+                We have assessed that this processing does not override your rights, as:
+              </p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li>Only property-related data is collected, not personal identifiers</li>
+                <li>The data is already publicly available from the council website</li>
+                <li>You have a reasonable expectation that the data will be stored to provide the service</li>
+                <li>You can delete your data at any time</li>
               </ul>
             </section>
 
@@ -51,7 +75,7 @@ export default function PrivacyPolicy() {
                 <li>Generate your personalised bin collection calendar</li>
                 <li>Refresh collection dates daily to detect bank holiday changes</li>
               </ul>
-              <p className="mt-3">We do not share, sell, or transfer your data to any third parties.</p>
+              <p className="mt-3">We do not share, sell, or transfer your data to any third parties for marketing purposes.</p>
             </section>
 
             <section>
@@ -65,9 +89,21 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
+              <h2 className="text-lg font-semibold text-slate-900 mt-6 mb-3">Data processors</h2>
+              <p>Your data is stored using the following third-party service:</p>
+              <ul className="list-disc pl-5 space-y-1 mt-2">
+                <li><strong>Neon</strong> (neon.tech) - PostgreSQL database hosting, servers located in AWS regions</li>
+              </ul>
+              <p className="mt-3">
+                This processor is bound by appropriate data processing agreements and security measures.
+              </p>
+            </section>
+
+            <section>
               <h2 className="text-lg font-semibold text-slate-900 mt-6 mb-3">Data retention</h2>
               <p>
-                We retain your subscription data indefinitely to continue providing the calendar service.
+                We retain your subscription data for as long as you use the service.
+                Subscriptions that have not been accessed for over 2 years may be deleted.
                 You can request deletion at any time (see below).
               </p>
             </section>
@@ -79,8 +115,17 @@ export default function PrivacyPolicy() {
                 <li><strong>Access</strong> - request a copy of your data</li>
                 <li><strong>Rectification</strong> - request correction of inaccurate data</li>
                 <li><strong>Erasure</strong> - request deletion of your data (&quot;right to be forgotten&quot;)</li>
+                <li><strong>Restriction</strong> - request limitation of processing</li>
+                <li><strong>Objection</strong> - object to processing based on legitimate interests</li>
                 <li><strong>Portability</strong> - receive your data in a machine-readable format</li>
               </ul>
+              <p className="mt-3">
+                If you are not satisfied with how we handle your data, you have the right to lodge
+                a complaint with the Information Commissioner&apos;s Office (ICO) at{' '}
+                <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                  ico.org.uk
+                </a>.
+              </p>
             </section>
 
             <section>
@@ -123,7 +168,9 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="text-lg font-semibold text-slate-900 mt-6 mb-3">Contact</h2>
               <p>
-                For privacy-related enquiries or to exercise your data rights, please contact us via the repository issues page.
+                For privacy-related enquiries or to exercise your data rights, please raise an issue
+                on the project&apos;s GitHub repository. We aim to respond to all data protection
+                requests within 30 days.
               </p>
             </section>
           </div>

@@ -117,27 +117,44 @@ function escapeICalText(text: string): string {
 
 /**
  * Fold long lines according to RFC 5545
- * Lines should be no longer than 75 octets, excluding the line break.
+ * Lines should be no longer than 75 octets (bytes), excluding the line break.
  * Folding is done by inserting a CRLF followed by a single whitespace.
+ *
+ * This implementation properly counts bytes, not characters, and avoids
+ * splitting multi-byte UTF-8 characters.
  */
 function foldLine(line: string): string {
-  const MAX_LINE_LENGTH = 75;
+  const MAX_BYTES = 75;
 
-  if (line.length <= MAX_LINE_LENGTH) {
+  // Quick check: if ASCII-only and short enough, return as-is
+  const lineBytes = Buffer.byteLength(line, 'utf-8');
+  if (lineBytes <= MAX_BYTES) {
     return line;
   }
 
   const result: string[] = [];
-  let remaining = line;
+  let currentLine = '';
+  let currentBytes = 0;
+  let isFirstLine = true;
 
-  // First line can be up to 75 chars
-  result.push(remaining.slice(0, MAX_LINE_LENGTH));
-  remaining = remaining.slice(MAX_LINE_LENGTH);
+  for (const char of line) {
+    const charBytes = Buffer.byteLength(char, 'utf-8');
+    const maxForThisLine = isFirstLine ? MAX_BYTES : MAX_BYTES - 1; // -1 for leading space
 
-  // Continuation lines start with a space, so effective length is 74
-  while (remaining.length > 0) {
-    result.push(' ' + remaining.slice(0, MAX_LINE_LENGTH - 1));
-    remaining = remaining.slice(MAX_LINE_LENGTH - 1);
+    if (currentBytes + charBytes > maxForThisLine) {
+      // Start a new line
+      result.push(currentLine);
+      currentLine = ' ' + char; // Continuation lines start with space
+      currentBytes = 1 + charBytes;
+      isFirstLine = false;
+    } else {
+      currentLine += char;
+      currentBytes += charBytes;
+    }
+  }
+
+  if (currentLine) {
+    result.push(currentLine);
   }
 
   return result.join('\r\n');

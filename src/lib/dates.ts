@@ -44,8 +44,12 @@ export function generateCollectionDates(
 
   // If start date is in the past, advance to the next occurrence
   // that is today or in the future
-  while (isBefore(current, today)) {
+  // Limit iterations to prevent DoS with malformed dates
+  let iterations = 0;
+  const MAX_ITERATIONS = 200; // ~4 years at weekly interval
+  while (isBefore(current, today) && iterations < MAX_ITERATIONS) {
     current = addDays(current, interval);
+    iterations++;
   }
 
   // Generate dates from current forward

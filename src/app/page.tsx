@@ -148,11 +148,11 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50">
       {/* Header bar */}
-      <div className="bg-slate-900 text-white">
+      <header className="bg-slate-900 text-white">
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center" aria-hidden="true">
                 <span className="text-xl">📅</span>
               </div>
               <div>
@@ -162,7 +162,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Main content card */}
@@ -178,11 +178,12 @@ export default function Home() {
                 Get a calendar feed that automatically updates with your bin collection dates, including bank holiday changes.
               </p>
 
-              <label className="block text-sm font-medium text-slate-900 mb-2">
+              <label htmlFor="postcode-input" className="block text-sm font-medium text-slate-900 mb-2">
                 Enter your postcode
               </label>
               <div className="flex gap-3">
                 <input
+                  id="postcode-input"
                   type="text"
                   value={postcode}
                   onChange={(e) => {
@@ -200,7 +201,7 @@ export default function Home() {
                   className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" aria-label="Loading" role="img">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
@@ -211,7 +212,7 @@ export default function Home() {
               </div>
 
               {error && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+                <div role="alert" className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
                   {error}
                 </div>
               )}
@@ -225,17 +226,18 @@ export default function Home() {
                 onClick={() => setStep('input')}
                 className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900 mb-4 font-medium"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
                 Change postcode
               </button>
 
-              <h2 className="text-xl font-semibold text-slate-900 mb-4">
+              <label htmlFor="address-select" className="text-xl font-semibold text-slate-900 mb-4 block">
                 Select your address
-              </h2>
+              </label>
 
               <select
+                id="address-select"
                 value={selectedAddress?.uprn || ''}
                 onChange={(e) => {
                   const addr = addresses.find(a => a.uprn === e.target.value);
@@ -260,7 +262,7 @@ export default function Home() {
                 >
                   {loading ? (
                     <span className="inline-flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" aria-label="Loading" role="img">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
@@ -273,7 +275,7 @@ export default function Home() {
               )}
 
               {error && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+                <div role="alert" className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
                   {error}
                 </div>
               )}
@@ -286,7 +288,7 @@ export default function Home() {
               {/* Success banner */}
               <div className="bg-green-600 text-white p-6 rounded-t-xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center" aria-hidden="true">
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -301,18 +303,21 @@ export default function Home() {
               <div className="p-6 md:p-8 space-y-8">
                 {/* Calendar URL */}
                 <div>
-                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                  <label htmlFor="calendar-url" className="block text-sm font-medium text-slate-900 mb-2">
                     Subscription URL
                   </label>
                   <div className="flex gap-2">
                     <input
+                      id="calendar-url"
                       type="text"
                       readOnly
+                      aria-readonly="true"
                       value={subscription.calendarUrl}
                       className="flex-1 px-4 py-3 text-sm rounded-lg border border-slate-200 bg-slate-50 text-slate-700 font-mono truncate"
                     />
                     <button
                       onClick={handleCopy}
+                      aria-live="polite"
                       className={`px-5 py-3 rounded-lg font-medium text-sm transition-colors ${
                         copied
                           ? 'bg-green-100 text-green-800'
@@ -359,7 +364,7 @@ export default function Home() {
                     <details className="group">
                       <summary className="flex items-center justify-between p-4 cursor-pointer">
                         <span className="font-medium text-slate-900">Apple Calendar (iPhone, iPad, Mac)</span>
-                        <svg className="w-5 h-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </summary>
@@ -372,7 +377,7 @@ export default function Home() {
                     <details className="group">
                       <summary className="flex items-center justify-between p-4 cursor-pointer">
                         <span className="font-medium text-slate-900">Google Calendar</span>
-                        <svg className="w-5 h-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </summary>
@@ -384,7 +389,7 @@ export default function Home() {
                     <details className="group">
                       <summary className="flex items-center justify-between p-4 cursor-pointer">
                         <span className="font-medium text-slate-900">Outlook</span>
-                        <svg className="w-5 h-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 text-slate-500 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </summary>
