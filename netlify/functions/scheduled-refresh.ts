@@ -1,5 +1,5 @@
 import type { Config, Context } from '@netlify/functions';
-import { neon } from '@neondatabase/serverless';
+import { neon } from '@netlify/neon';
 import * as cheerio from 'cheerio';
 import { addDays } from 'date-fns';
 
@@ -24,13 +24,7 @@ export const config: Config = {
 export default async function handler(_request: Request, _context: Context) {
   console.log('Starting scheduled refresh of bin collection data...');
 
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    console.error('DATABASE_URL not configured');
-    return new Response('Database not configured', { status: 500 });
-  }
-
-  const sql = neon(databaseUrl);
+  const sql = neon();
 
   try {
     // Get all active subscriptions

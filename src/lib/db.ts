@@ -1,14 +1,10 @@
-import { neon } from '@neondatabase/serverless';
+import { neon } from '@netlify/neon';
 import { v4 as uuidv4 } from 'uuid';
 import type { Subscription, Collection, CollectionOverride, CollectionService } from '@/types';
 
-// Create SQL client (serverless-compatible)
+// Create SQL client (auto-configured by Netlify)
 function getSQL() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error('DATABASE_URL environment variable is not set');
-  }
-  return neon(databaseUrl);
+  return neon();
 }
 
 /**

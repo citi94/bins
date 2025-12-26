@@ -12,40 +12,38 @@ Subscribe to your Dover District Council bin collection dates as an iCal calenda
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router) + TypeScript
-- **Database**: Neon PostgreSQL (serverless)
+- **Database**: Netlify DB (Neon PostgreSQL, auto-provisioned)
 - **Hosting**: Netlify (with scheduled functions)
 - **Scraping**: Cheerio for HTML parsing
 
 ## Setup
 
-### 1. Database
+### 1. Deploy to Netlify
 
-Create a Neon database at [neon.tech](https://neon.tech) and run the schema:
+Push to GitHub and connect to Netlify. The `@netlify/neon` package triggers automatic database provisioning on first build.
+
+### 2. Initialize Database Schema
+
+After deployment, run the schema via Neon console or CLI:
 
 ```bash
 psql $DATABASE_URL < schema.sql
 ```
 
-### 2. Environment Variables
+You can find your DATABASE_URL in the Netlify dashboard under Extensions → Neon.
 
-Create `.env.local`:
+### 3. Claim Your Database
 
-```
-DATABASE_URL=postgresql://...your-neon-connection-string...
-```
+**Important**: Claim your database in the Netlify UI within 7 days to keep it running. Go to Extensions → Neon → Claim database.
 
-For production, add `DATABASE_URL` to Netlify environment variables.
-
-### 3. Development
+### 4. Local Development
 
 ```bash
 npm install
-npm run dev
+netlify dev  # Uses Netlify CLI for local dev with DB access
 ```
 
-### 4. Deploy
-
-Push to GitHub and connect to Netlify. The `netlify.toml` configures:
+The `netlify.toml` configures:
 - Next.js build
 - Scheduled function for daily data refresh (6am UTC)
 

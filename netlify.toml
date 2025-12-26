@@ -9,9 +9,8 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Scheduled function for daily refresh (6am UTC)
+# Functions directory
 [functions]
   directory = "netlify/functions"
 
-[[functions.scheduled-refresh.schedule]]
-  cron = "0 6 * * *"
+# Schedule is defined in the function file via config export
