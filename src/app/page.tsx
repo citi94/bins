@@ -21,24 +21,24 @@ interface SubscriptionResult {
 
 type Step = 'input' | 'select' | 'success';
 
-const BIN_COLORS: Record<string, { bg: string; text: string; icon: string }> = {
-  'Refuse Collection': { bg: 'bg-zinc-700', text: 'text-zinc-100', icon: '🗑️' },
-  'Paper/Card Collection': { bg: 'bg-blue-600', text: 'text-blue-50', icon: '📦' },
-  'Recycling Collection': { bg: 'bg-emerald-600', text: 'text-emerald-50', icon: '♻️' },
-  'Food Collection': { bg: 'bg-amber-600', text: 'text-amber-50', icon: '🍎' },
-  'Garden Waste Collection': { bg: 'bg-lime-700', text: 'text-lime-50', icon: '🌿' },
+const BIN_COLORS: Record<string, { bg: string; border: string; icon: string }> = {
+  'Refuse Collection': { bg: 'bg-neutral-800', border: 'border-neutral-700', icon: '🗑️' },
+  'Paper/Card Collection': { bg: 'bg-blue-600', border: 'border-blue-500', icon: '📦' },
+  'Recycling Collection': { bg: 'bg-green-600', border: 'border-green-500', icon: '♻️' },
+  'Food Collection': { bg: 'bg-orange-500', border: 'border-orange-400', icon: '🍎' },
+  'Garden Waste Collection': { bg: 'bg-emerald-700', border: 'border-emerald-600', icon: '🌿' },
 };
 
 function getBinStyle(name: string) {
-  return BIN_COLORS[name] || { bg: 'bg-teal-600', text: 'text-teal-50', icon: '📅' };
+  return BIN_COLORS[name] || { bg: 'bg-gray-600', border: 'border-gray-500', icon: '📅' };
 }
 
 function formatDate(dateStr: string) {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-GB', {
-    weekday: 'long',
+    weekday: 'short',
     day: 'numeric',
-    month: 'long'
+    month: 'short'
   });
 }
 
@@ -125,7 +125,6 @@ export default function Home() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback for older browsers
       const textarea = document.createElement('textarea');
       textarea.value = subscription.calendarUrl;
       document.body.appendChild(textarea);
@@ -147,347 +146,255 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-stone-50 via-teal-50/30 to-emerald-50/40 relative overflow-hidden">
-      {/* Decorative background pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c-2 8-8 14-16 16 8 2 14 8 16 16 2-8 8-14 16-16-8-2-14-8-16-16z' fill='%23166534' fill-opacity='1'/%3E%3C/svg%3E")`,
-        backgroundSize: '60px 60px'
-      }} />
-
-      <div className="relative z-10 max-w-2xl mx-auto px-4 py-12 md:py-20">
+    <main className="min-h-screen bg-white">
+      <div className="max-w-lg mx-auto px-4 py-12 md:py-16">
         {/* Header */}
-        <header className="text-center mb-12 md:mb-16">
-          <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm mb-6 border border-teal-100">
-            <span className="text-2xl">🗑️</span>
-            <span className="text-sm font-medium text-teal-800 tracking-wide uppercase">Dover District</span>
-          </div>
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-stone-800 mb-4 leading-tight">
-            Never Miss a<br />
-            <span className="text-teal-700">Bin Collection</span>
+        <header className="mb-10">
+          <p className="text-sm font-medium text-neutral-500 mb-2">Dover District Council</p>
+          <h1 className="text-3xl md:text-4xl font-semibold text-neutral-900 tracking-tight">
+            Bin Collection Calendar
           </h1>
-          <p className="text-lg text-stone-600 max-w-md mx-auto leading-relaxed">
-            Subscribe to a calendar that updates automatically —
-            even when dates change for bank holidays.
+          <p className="mt-3 text-neutral-600">
+            Get a calendar subscription that updates automatically, including bank holiday changes.
           </p>
         </header>
 
-        {/* Main Card */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl shadow-teal-900/5 border border-stone-200/60 overflow-hidden">
-
-          {/* Step: Input */}
-          {step === 'input' && (
-            <div className="p-6 md:p-10 animate-fadeIn">
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Your Postcode
-              </label>
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={postcode}
-                  onChange={(e) => {
-                    setPostcode(e.target.value.toUpperCase());
-                    setError(null);
-                  }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
-                  placeholder="e.g. CT3 2AW"
-                  className="flex-1 px-4 py-3 text-lg rounded-xl border-2 border-stone-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all bg-white placeholder:text-stone-400"
-                  disabled={loading}
-                />
-                <button
-                  onClick={handleLookup}
-                  disabled={loading}
-                  className="px-6 py-3 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-teal-600/20 hover:shadow-xl hover:shadow-teal-600/30 hover:-translate-y-0.5"
-                >
-                  {loading ? (
-                    <span className="inline-flex items-center gap-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      <span className="hidden md:inline">Looking up...</span>
-                    </span>
-                  ) : (
-                    'Find Address'
-                  )}
-                </button>
-              </div>
-
-              {error && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm animate-shake">
-                  {error}
-                </div>
-              )}
-
-              <p className="mt-4 text-sm text-stone-500">
-                This service is for Dover District Council residents only.
-              </p>
-            </div>
-          )}
-
-          {/* Step: Select Address */}
-          {step === 'select' && (
-            <div className="p-6 md:p-10 animate-fadeIn">
-              <button
-                onClick={() => setStep('input')}
-                className="inline-flex items-center gap-1 text-sm text-teal-600 hover:text-teal-700 mb-4 group"
-              >
-                <svg className="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                Change postcode
-              </button>
-
-              <label className="block text-sm font-medium text-stone-700 mb-2">
-                Select Your Address
-              </label>
-              <select
-                value={selectedAddress?.uprn || ''}
+        {/* Step: Input */}
+        {step === 'input' && (
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Postcode
+            </label>
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={postcode}
                 onChange={(e) => {
-                  const addr = addresses.find(a => a.uprn === e.target.value);
-                  setSelectedAddress(addr || null);
+                  setPostcode(e.target.value.toUpperCase());
                   setError(null);
                 }}
-                className="w-full px-4 py-3 text-lg rounded-xl border-2 border-stone-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 outline-none transition-all bg-white appearance-none cursor-pointer"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 1rem center',
-                  backgroundSize: '1.5rem',
-                }}
+                onKeyDown={(e) => e.key === 'Enter' && handleLookup()}
+                placeholder="e.g. CT14 6AD"
+                className="flex-1 px-4 py-3 text-base rounded-lg border border-neutral-300 focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10 outline-none transition-all"
+                disabled={loading}
+              />
+              <button
+                onClick={handleLookup}
+                disabled={loading}
+                className="px-5 py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <option value="">Choose an address...</option>
-                {addresses.map((addr) => (
-                  <option key={addr.uprn} value={addr.uprn}>
-                    {addr.address}
-                  </option>
-                ))}
-              </select>
-
-              {selectedAddress && (
-                <button
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                  className="mt-6 w-full px-6 py-4 bg-teal-600 hover:bg-teal-700 active:bg-teal-800 text-white font-semibold text-lg rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-teal-600/20 hover:shadow-xl hover:shadow-teal-600/30 hover:-translate-y-0.5 animate-slideUp"
-                >
-                  {loading ? (
-                    <span className="inline-flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      Creating calendar...
-                    </span>
-                  ) : (
-                    <>Get My Calendar</>
-                  )}
-                </button>
-              )}
-
-              {error && (
-                <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm animate-shake">
-                  {error}
-                </div>
-              )}
+                {loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  </span>
+                ) : (
+                  'Look up'
+                )}
+              </button>
             </div>
-          )}
 
-          {/* Step: Success */}
-          {step === 'success' && subscription && (
-            <div className="animate-fadeIn">
-              {/* Success header */}
-              <div className="bg-gradient-to-r from-teal-600 to-emerald-600 p-6 md:p-10 text-white text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-full mb-4 animate-bounce-once">
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h2 className="font-serif text-2xl md:text-3xl mb-2">Your Calendar is Ready!</h2>
-                <p className="text-teal-100 text-sm md:text-base">Add it to your calendar app to stay updated</p>
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
               </div>
+            )}
+          </div>
+        )}
 
-              <div className="p-6 md:p-10 space-y-8">
-                {/* Calendar URL */}
-                <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">
-                    Calendar Subscription URL
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={subscription.calendarUrl}
-                      className="flex-1 px-4 py-3 text-sm rounded-xl border-2 border-stone-200 bg-stone-50 text-stone-600 font-mono truncate"
-                    />
-                    <button
-                      onClick={handleCopy}
-                      className={`px-5 py-3 rounded-xl font-semibold transition-all ${
-                        copied
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
-                      }`}
+        {/* Step: Select Address */}
+        {step === 'select' && (
+          <div>
+            <button
+              onClick={() => setStep('input')}
+              className="inline-flex items-center gap-1 text-sm text-neutral-500 hover:text-neutral-700 mb-4"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Select your address
+            </label>
+            <select
+              value={selectedAddress?.uprn || ''}
+              onChange={(e) => {
+                const addr = addresses.find(a => a.uprn === e.target.value);
+                setSelectedAddress(addr || null);
+                setError(null);
+              }}
+              className="w-full px-4 py-3 text-base rounded-lg border border-neutral-300 focus:border-neutral-900 focus:ring-2 focus:ring-neutral-900/10 outline-none transition-all bg-white"
+            >
+              <option value="">Choose an address...</option>
+              {addresses.map((addr) => (
+                <option key={addr.uprn} value={addr.uprn}>
+                  {addr.address}
+                </option>
+              ))}
+            </select>
+
+            {selectedAddress && (
+              <button
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="mt-4 w-full px-5 py-3 bg-neutral-900 hover:bg-neutral-800 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Creating calendar...
+                  </span>
+                ) : (
+                  'Get calendar'
+                )}
+              </button>
+            )}
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step: Success */}
+        {step === 'success' && subscription && (
+          <div>
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-neutral-900">Calendar ready</h2>
+            </div>
+
+            {/* Calendar URL */}
+            <div className="mb-8">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Calendar URL
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={subscription.calendarUrl}
+                  className="flex-1 px-3 py-2 text-sm rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 font-mono truncate"
+                />
+                <button
+                  onClick={handleCopy}
+                  className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                    copied
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-neutral-100 hover:bg-neutral-200 text-neutral-700'
+                  }`}
+                >
+                  {copied ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+            </div>
+
+            {/* Upcoming collections */}
+            <div className="mb-8">
+              <h3 className="text-sm font-medium text-neutral-700 mb-3">Next collections</h3>
+              <div className="space-y-2">
+                {subscription.services.map((service) => {
+                  const style = getBinStyle(service.name);
+                  return (
+                    <div
+                      key={service.name}
+                      className={`${style.bg} text-white p-4 rounded-lg flex items-center justify-between`}
                     >
-                      {copied ? '✓ Copied!' : 'Copy'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Upcoming collections */}
-                <div>
-                  <h3 className="text-sm font-medium text-stone-700 mb-3">Your Next Collections</h3>
-                  <div className="grid gap-2">
-                    {subscription.services.map((service) => {
-                      const style = getBinStyle(service.name);
-                      return (
-                        <div
-                          key={service.name}
-                          className={`${style.bg} ${style.text} p-4 rounded-xl flex items-center gap-4`}
-                        >
-                          <span className="text-2xl">{style.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold truncate">{service.name}</div>
-                            <div className="text-sm opacity-80">{service.schedule}</div>
-                          </div>
-                          <div className="text-right text-sm">
-                            <div className="font-semibold">{formatDate(service.nextCollection)}</div>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl">{style.icon}</span>
+                        <div>
+                          <div className="font-medium">{service.name.replace(' Collection', '')}</div>
+                          <div className="text-sm opacity-75">{service.schedule}</div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Instructions */}
-                <div className="bg-stone-50 rounded-2xl p-6 border border-stone-200">
-                  <h3 className="font-semibold text-stone-800 mb-4">How to Add This Calendar</h3>
-
-                  <div className="space-y-4 text-sm">
-                    <details className="group">
-                      <summary className="flex items-center gap-3 cursor-pointer list-none">
-                        <span className="text-2xl">🍎</span>
-                        <span className="font-medium text-stone-700 group-hover:text-teal-600 transition-colors">Apple Calendar (iPhone, iPad, Mac)</span>
-                        <svg className="w-4 h-4 ml-auto text-stone-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </summary>
-                      <div className="mt-3 pl-11 text-stone-600 space-y-2">
-                        <p><strong>On iPhone/iPad:</strong> Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → Paste URL</p>
-                        <p><strong>On Mac:</strong> Calendar → File → New Calendar Subscription → Paste URL</p>
                       </div>
-                    </details>
-
-                    <details className="group">
-                      <summary className="flex items-center gap-3 cursor-pointer list-none">
-                        <span className="text-2xl">📅</span>
-                        <span className="font-medium text-stone-700 group-hover:text-teal-600 transition-colors">Google Calendar</span>
-                        <svg className="w-4 h-4 ml-auto text-stone-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </summary>
-                      <div className="mt-3 pl-11 text-stone-600 space-y-2">
-                        <p>Open Google Calendar on your computer → Click the + next to &quot;Other calendars&quot; → From URL → Paste URL → Add calendar</p>
+                      <div className="text-right font-medium">
+                        {formatDate(service.nextCollection)}
                       </div>
-                    </details>
-
-                    <details className="group">
-                      <summary className="flex items-center gap-3 cursor-pointer list-none">
-                        <span className="text-2xl">📧</span>
-                        <span className="font-medium text-stone-700 group-hover:text-teal-600 transition-colors">Outlook</span>
-                        <svg className="w-4 h-4 ml-auto text-stone-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </summary>
-                      <div className="mt-3 pl-11 text-stone-600 space-y-2">
-                        <p><strong>Outlook.com:</strong> Calendar → Add calendar → Subscribe from web → Paste URL</p>
-                        <p><strong>Desktop:</strong> File → Account Settings → Internet Calendars → New → Paste URL</p>
-                      </div>
-                    </details>
-                  </div>
-                </div>
-
-                {/* Start over */}
-                <button
-                  onClick={reset}
-                  className="w-full py-3 text-stone-500 hover:text-stone-700 text-sm font-medium transition-colors"
-                >
-                  Subscribe another address
-                </button>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Instructions */}
+            <div className="border border-neutral-200 rounded-lg divide-y divide-neutral-200">
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 cursor-pointer">
+                  <span className="font-medium text-neutral-900">Apple Calendar</span>
+                  <svg className="w-5 h-5 text-neutral-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div className="px-4 pb-4 text-sm text-neutral-600">
+                  <p className="mb-2"><strong>iPhone/iPad:</strong> Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → Paste URL</p>
+                  <p><strong>Mac:</strong> Calendar → File → New Calendar Subscription → Paste URL</p>
+                </div>
+              </details>
+
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 cursor-pointer">
+                  <span className="font-medium text-neutral-900">Google Calendar</span>
+                  <svg className="w-5 h-5 text-neutral-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div className="px-4 pb-4 text-sm text-neutral-600">
+                  <p>On desktop: Click + next to &quot;Other calendars&quot; → From URL → Paste URL</p>
+                </div>
+              </details>
+
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 cursor-pointer">
+                  <span className="font-medium text-neutral-900">Outlook</span>
+                  <svg className="w-5 h-5 text-neutral-400 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
+                <div className="px-4 pb-4 text-sm text-neutral-600">
+                  <p><strong>Outlook.com:</strong> Calendar → Add calendar → Subscribe from web → Paste URL</p>
+                </div>
+              </details>
+            </div>
+
+            {/* Start over */}
+            <button
+              onClick={reset}
+              className="mt-6 w-full py-3 text-neutral-500 hover:text-neutral-700 text-sm font-medium transition-colors"
+            >
+              Look up another address
+            </button>
+          </div>
+        )}
 
         {/* Footer */}
-        <footer className="mt-12 text-center text-sm text-stone-500">
+        <footer className="mt-16 pt-8 border-t border-neutral-100 text-sm text-neutral-500">
           <p>
-            Data sourced from{' '}
+            Data from{' '}
             <a
               href="https://collections.dover.gov.uk"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-teal-600 hover:text-teal-700 underline underline-offset-2"
+              className="underline hover:text-neutral-700"
             >
               Dover District Council
             </a>
-          </p>
-          <p className="mt-2 text-stone-400">
-            Calendar refreshes daily to catch holiday changes
+            . Calendar updates daily.
           </p>
         </footer>
       </div>
-
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
-
-        :root {
-          --font-serif: 'Fraunces', Georgia, serif;
-          --font-sans: 'Source Sans 3', system-ui, sans-serif;
-        }
-
-        body {
-          font-family: var(--font-sans);
-        }
-
-        .font-serif {
-          font-family: var(--font-serif);
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-
-        @keyframes bounce-once {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.1); }
-        }
-
-        .animate-fadeIn {
-          animation: fadeIn 0.4s ease-out;
-        }
-
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-
-        .animate-shake {
-          animation: shake 0.3s ease-in-out;
-        }
-
-        .animate-bounce-once {
-          animation: bounce-once 0.5s ease-out;
-        }
-      `}</style>
     </main>
   );
 }
