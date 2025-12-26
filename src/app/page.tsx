@@ -21,16 +21,16 @@ interface SubscriptionResult {
 
 type Step = 'input' | 'select' | 'success';
 
-const BIN_COLORS: Record<string, { bg: string; icon: string }> = {
-  'Refuse Collection': { bg: 'bg-slate-700', icon: '🗑️' },
-  'Paper/Card Collection': { bg: 'bg-blue-700', icon: '📦' },
-  'Recycling Collection': { bg: 'bg-green-700', icon: '♻️' },
-  'Food Collection': { bg: 'bg-amber-600', icon: '🍎' },
-  'Garden Waste Collection': { bg: 'bg-emerald-700', icon: '🌿' },
+const BIN_CONFIG: Record<string, { bg: string; icon: string; displayName: string }> = {
+  'Refuse Collection': { bg: 'bg-slate-700', icon: '🗑️', displayName: 'General Waste' },
+  'Paper/Card Collection': { bg: 'bg-blue-700', icon: '📦', displayName: 'Paper/Card' },
+  'Recycling Collection': { bg: 'bg-green-700', icon: '♻️', displayName: 'Recycling' },
+  'Food Collection': { bg: 'bg-amber-600', icon: '🍎', displayName: 'Food' },
+  'Garden Waste Collection': { bg: 'bg-emerald-700', icon: '🌿', displayName: 'Garden Waste' },
 };
 
-function getBinStyle(name: string) {
-  return BIN_COLORS[name] || { bg: 'bg-slate-600', icon: '📅' };
+function getBinConfig(name: string) {
+  return BIN_CONFIG[name] || { bg: 'bg-slate-600', icon: '📅', displayName: name.replace(' Collection', '') };
 }
 
 function formatDate(dateStr: string) {
@@ -334,16 +334,16 @@ export default function Home() {
                   <h3 className="text-sm font-medium text-slate-900 mb-3">Your collection schedule</h3>
                   <div className="space-y-2">
                     {subscription.services.map((service) => {
-                      const style = getBinStyle(service.name);
+                      const config = getBinConfig(service.name);
                       return (
                         <div
                           key={service.name}
-                          className={`${style.bg} text-white p-4 rounded-lg flex items-center justify-between`}
+                          className={`${config.bg} text-white p-4 rounded-lg flex items-center justify-between`}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl">{style.icon}</span>
+                            <span className="text-2xl">{config.icon}</span>
                             <div>
-                              <div className="font-medium">{service.name.replace(' Collection', '')}</div>
+                              <div className="font-medium">{config.displayName}</div>
                               <div className="text-sm text-white/80">{service.schedule}</div>
                             </div>
                           </div>

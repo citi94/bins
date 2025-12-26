@@ -1,4 +1,4 @@
-import { formatICalDate } from './dates';
+import { formatICalDate, formatDateKey } from './dates';
 import { addDays } from 'date-fns';
 import { createHash } from 'crypto';
 import type { CalendarEvent } from '@/types';
@@ -9,18 +9,37 @@ interface ICalOptions {
 }
 
 /**
- * Map service names to bin colors/descriptions for calendar events
+ * Map service names to friendly bin names
  */
-const SERVICE_DESCRIPTIONS: Record<string, string> = {
-  'Refuse Collection': 'Put out your black bin (general waste)',
-  'Paper/Card Collection': 'Put out your blue bin (paper and card)',
-  'Recycling Collection': 'Put out your green bin (mixed recycling)',
-  'Food Collection': 'Put out your food waste caddy',
-  'Garden Waste Collection': 'Put out your brown bin (garden waste)',
+const SERVICE_NAMES: Record<string, string> = {
+  'Refuse Collection': 'General Waste',
+  'Paper/Card Collection': 'Paper/Card',
+  'Recycling Collection': 'Recycling',
+  'Food Collection': 'Food',
+  'Garden Waste Collection': 'Garden Waste',
 };
 
 /**
+ * Map service names to bin descriptions
+ */
+const SERVICE_DESCRIPTIONS: Record<string, string> = {
+  'Refuse Collection': 'Black bin (general waste)',
+  'Paper/Card Collection': 'Blue bin (paper and card)',
+  'Recycling Collection': 'Green bin (mixed recycling)',
+  'Food Collection': 'Food waste caddy',
+  'Garden Waste Collection': 'Brown bin (garden waste)',
+};
+
+/**
+ * Get friendly name for a service
+ */
+function getFriendlyName(serviceName: string): string {
+  return SERVICE_NAMES[serviceName] || serviceName.replace(' Collection', '');
+}
+
+/**
  * Generate an iCal calendar string from collection events
+ * Groups all collections on the same day into a single event
  */
 export function generateICalendar(
   events: { serviceName: string; events: CalendarEvent[] }[],
@@ -36,40 +55,67 @@ export function generateICalendar(
     'X-WR-TIMEZONE:Europe/London',
   ];
 
-  // Add each event
+  // Group all events by date
+  const eventsByDate = new Map<string, { services: string[]; date: Date; hasOverride: boolean }>();
+
   for (const service of events) {
     for (const event of service.events) {
-      lines.push(...generateEvent(service.serviceName, event, options.uprn));
+      const dateKey = formatDateKey(event.date);
+
+      if (!eventsByDate.has(dateKey)) {
+        eventsByDate.set(dateKey, {
+          services: [],
+          date: event.date,
+          hasOverride: false,
+        });
+      }
+
+      const dayEvent = eventsByDate.get(dateKey)!;
+      dayEvent.services.push(service.serviceName);
+      if (event.isOverride) {
+        dayEvent.hasOverride = true;
+      }
     }
+  }
+
+  // Generate one event per day
+  for (const [dateKey, dayEvent] of eventsByDate) {
+    lines.push(...generateDayEvent(dayEvent.services, dayEvent.date, dayEvent.hasOverride, options.uprn));
   }
 
   lines.push('END:VCALENDAR');
 
-  // Fold lines that exceed 75 characters
+  // Fold lines that exceed 75 bytes
   return lines.map(foldLine).join('\r\n');
 }
 
 /**
- * Generate a VEVENT block for a single collection event
+ * Generate a VEVENT block for a day's collections
  */
-function generateEvent(
-  serviceName: string,
-  event: CalendarEvent,
+function generateDayEvent(
+  serviceNames: string[],
+  date: Date,
+  hasOverride: boolean,
   uprn: string
 ): string[] {
-  const dateStr = formatICalDate(event.date);
-  const nextDay = formatICalDate(addDays(event.date, 1));
-  const uid = generateEventUID(serviceName, event.date, uprn);
-  const description = SERVICE_DESCRIPTIONS[serviceName] || `${serviceName} day`;
+  const dateStr = formatICalDate(date);
+  const nextDay = formatICalDate(addDays(date, 1));
+  const uid = generateEventUID('bins', date, uprn);
 
-  // Add note if this is a holiday-adjusted date
-  const summary = event.isOverride
-    ? `${serviceName} (changed date)`
-    : serviceName;
+  // Build summary: "Bin Day: Recycling, General Waste, Food"
+  const friendlyNames = serviceNames.map(getFriendlyName);
+  const summary = hasOverride
+    ? `Bin Day (changed): ${friendlyNames.join(', ')}`
+    : `Bin Day: ${friendlyNames.join(', ')}`;
 
-  const fullDescription = event.isOverride
-    ? `${description}\n\nNote: This collection date was changed, likely due to a bank holiday.`
-    : description;
+  // Build description with bin details
+  const binDetails = serviceNames
+    .map(name => SERVICE_DESCRIPTIONS[name] || name)
+    .join('\\n');
+
+  const description = hasOverride
+    ? `Put out:\\n${binDetails}\\n\\nNote: Date changed due to bank holiday.`
+    : `Put out:\\n${binDetails}`;
 
   return [
     'BEGIN:VEVENT',
@@ -78,7 +124,7 @@ function generateEvent(
     `DTSTART;VALUE=DATE:${dateStr}`,
     `DTEND;VALUE=DATE:${nextDay}`,
     `SUMMARY:${escapeICalText(summary)}`,
-    `DESCRIPTION:${escapeICalText(fullDescription)}`,
+    `DESCRIPTION:${escapeICalText(description)}`,
     'TRANSP:TRANSPARENT', // Show as free (all-day event)
     'END:VEVENT',
   ];
