@@ -301,32 +301,53 @@ export default function Home() {
               </div>
 
               <div className="p-6 md:p-8 space-y-8">
-                {/* Calendar URL */}
+                {/* Add to Calendar button */}
                 <div>
-                  <label htmlFor="calendar-url" className="block text-sm font-medium text-slate-900 mb-2">
-                    Subscription URL
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      id="calendar-url"
-                      type="text"
-                      readOnly
-                      aria-readonly="true"
-                      value={subscription.calendarUrl}
-                      className="flex-1 px-4 py-3 text-sm rounded-lg border border-slate-200 bg-slate-50 text-slate-700 font-mono truncate"
-                    />
-                    <button
-                      onClick={handleCopy}
-                      aria-live="polite"
-                      className={`px-5 py-3 rounded-lg font-medium text-sm transition-colors ${
-                        copied
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                    >
-                      {copied ? 'Copied!' : 'Copy'}
-                    </button>
-                  </div>
+                  <a
+                    href={subscription.calendarUrl.replace('https://', 'webcal://')}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-lg"
+                  >
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Add to Calendar
+                  </a>
+                  <p className="text-sm text-slate-500 mt-2 text-center">
+                    Works with Apple Calendar, Outlook, and most calendar apps
+                  </p>
+                </div>
+
+                {/* Manual URL for Google Calendar etc */}
+                <div>
+                  <details className="group">
+                    <summary className="flex items-center justify-between cursor-pointer text-sm text-slate-600 hover:text-slate-900">
+                      <span>Or copy URL manually (for Google Calendar)</span>
+                      <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </summary>
+                    <div className="mt-3 flex gap-2">
+                      <input
+                        id="calendar-url"
+                        type="text"
+                        readOnly
+                        aria-readonly="true"
+                        value={subscription.calendarUrl}
+                        className="flex-1 px-4 py-3 text-sm rounded-lg border border-slate-200 bg-slate-50 text-slate-700 font-mono truncate"
+                      />
+                      <button
+                        onClick={handleCopy}
+                        aria-live="polite"
+                        className={`px-5 py-3 rounded-lg font-medium text-sm transition-colors ${
+                          copied
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {copied ? 'Copied!' : 'Copy'}
+                      </button>
+                    </div>
+                  </details>
                 </div>
 
                 {/* Upcoming collections */}
