@@ -2,9 +2,13 @@ import { neon } from '@netlify/neon';
 import { v4 as uuidv4 } from 'uuid';
 import type { Subscription, Collection, CollectionOverride, CollectionService } from '@/types';
 
-// Create SQL client (auto-configured by Netlify)
+// Create SQL client
 function getSQL() {
-  return neon();
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+  return neon(databaseUrl);
 }
 
 /**

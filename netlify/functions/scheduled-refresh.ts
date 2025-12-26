@@ -24,7 +24,13 @@ export const config: Config = {
 export default async function handler(_request: Request, _context: Context) {
   console.log('Starting scheduled refresh of bin collection data...');
 
-  const sql = neon();
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    console.error('DATABASE_URL not configured');
+    return new Response('Database not configured', { status: 500 });
+  }
+
+  const sql = neon(databaseUrl);
 
   try {
     // Get all active subscriptions
