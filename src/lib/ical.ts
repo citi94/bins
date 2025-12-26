@@ -20,14 +20,14 @@ const SERVICE_NAMES: Record<string, string> = {
 };
 
 /**
- * Map service names to bin descriptions
+ * Map service names to simple descriptions
  */
 const SERVICE_DESCRIPTIONS: Record<string, string> = {
-  'Refuse Collection': 'Black bin (general waste)',
-  'Paper/Card Collection': 'Blue bin (paper and card)',
-  'Recycling Collection': 'Green bin (mixed recycling)',
-  'Food Collection': 'Food waste caddy',
-  'Garden Waste Collection': 'Brown bin (garden waste)',
+  'Refuse Collection': 'General waste',
+  'Paper/Card Collection': 'Paper and card',
+  'Recycling Collection': 'Recycling',
+  'Food Collection': 'Food waste',
+  'Garden Waste Collection': 'Garden waste',
 };
 
 /**
