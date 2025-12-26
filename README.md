@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dover Bin Collection Calendar
 
-## Getting Started
+Subscribe to your Dover District Council bin collection dates as an iCal calendar. Get automatic updates when dates change for bank holidays.
 
-First, run the development server:
+## Features
+
+- Enter your postcode and select your address
+- Get a subscribable calendar URL that works with Apple Calendar, Google Calendar, Outlook, etc.
+- Daily refresh detects holiday-adjusted collection dates automatically
+- Supports all Dover bin types: Refuse, Recycling, Paper/Card, Food, Garden Waste
+
+## Tech Stack
+
+- **Framework**: Next.js 14 (App Router) + TypeScript
+- **Database**: Neon PostgreSQL (serverless)
+- **Hosting**: Netlify (with scheduled functions)
+- **Scraping**: Cheerio for HTML parsing
+
+## Setup
+
+### 1. Database
+
+Create a Neon database at [neon.tech](https://neon.tech) and run the schema:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+psql $DATABASE_URL < schema.sql
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create `.env.local`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+DATABASE_URL=postgresql://...your-neon-connection-string...
+```
 
-## Learn More
+For production, add `DATABASE_URL` to Netlify environment variables.
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 4. Deploy
 
-## Deploy on Vercel
+Push to GitHub and connect to Netlify. The `netlify.toml` configures:
+- Next.js build
+- Scheduled function for daily data refresh (6am UTC)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## API Endpoints
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `POST /api/lookup` - Postcode search (proxies to council site)
+- `POST /api/subscribe` - Create calendar subscription
+- `GET /api/calendar/[token]` - Serve ICS calendar file
+
+## How It Works
+
+1. User enters postcode → we query Dover Council's website
+2. User selects address → we scrape collection data and create subscription
+3. Calendar apps poll the ICS URL periodically
+4. Daily scheduled job re-scrapes council site to detect holiday changes
+5. If dates differ from expected pattern, we store overrides
+
+## Data Source
+
+Collection data is scraped from [collections.dover.gov.uk](https://collections.dover.gov.uk). This is an unofficial service.

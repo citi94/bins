@@ -1,0 +1,17 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Next.js plugin for Netlify
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Scheduled function for daily refresh (6am UTC)
+[functions]
+  directory = "netlify/functions"
+
+[[functions.scheduled-refresh.schedule]]
+  cron = "0 6 * * *"
