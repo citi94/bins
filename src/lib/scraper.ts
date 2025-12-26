@@ -118,6 +118,8 @@ export async function scrapePropertyCollections(uprn: string): Promise<Collectio
 
 /**
  * Parse a UK date string (DD/MM/YYYY) to a Date object
+ * Uses noon UTC to avoid timezone boundary issues - dates will always
+ * represent the correct day regardless of server timezone
  */
 function parseUKDate(dateStr: string): Date | null {
   if (!dateStr) return null;
@@ -126,5 +128,7 @@ function parseUKDate(dateStr: string): Date | null {
   if (!match) return null;
 
   const [, day, month, year] = match;
-  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  // Create date at noon UTC to avoid day boundary issues
+  // When converting to date-only in iCal, this will always be the correct day
+  return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0));
 }

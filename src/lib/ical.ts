@@ -1,5 +1,6 @@
 import { formatICalDate } from './dates';
 import { addDays } from 'date-fns';
+import { createHash } from 'crypto';
 import type { CalendarEvent } from '@/types';
 
 interface ICalOptions {
@@ -44,7 +45,8 @@ export function generateICalendar(
 
   lines.push('END:VCALENDAR');
 
-  return lines.join('\r\n');
+  // Fold lines that exceed 75 characters
+  return lines.map(foldLine).join('\r\n');
 }
 
 /**
@@ -83,12 +85,16 @@ function generateEvent(
 }
 
 /**
- * Generate a unique event ID
+ * Generate a unique event ID with hashed UPRN for privacy
+ * The hash ensures UIDs remain stable (same UPRN = same hash) while
+ * not exposing the actual property identifier
  */
 function generateEventUID(serviceName: string, date: Date, uprn: string): string {
   const serviceKey = serviceName.toLowerCase().replace(/[^a-z]/g, '');
   const dateKey = formatICalDate(date);
-  return `${serviceKey}-${uprn}-${dateKey}@doverbins.app`;
+  // Hash the UPRN to avoid exposing property identifiers
+  const uprnHash = createHash('sha256').update(uprn).digest('hex').substring(0, 12);
+  return `${serviceKey}-${uprnHash}-${dateKey}@doverbins.app`;
 }
 
 /**
@@ -107,4 +113,32 @@ function escapeICalText(text: string): string {
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
     .replace(/\n/g, '\\n');
+}
+
+/**
+ * Fold long lines according to RFC 5545
+ * Lines should be no longer than 75 octets, excluding the line break.
+ * Folding is done by inserting a CRLF followed by a single whitespace.
+ */
+function foldLine(line: string): string {
+  const MAX_LINE_LENGTH = 75;
+
+  if (line.length <= MAX_LINE_LENGTH) {
+    return line;
+  }
+
+  const result: string[] = [];
+  let remaining = line;
+
+  // First line can be up to 75 chars
+  result.push(remaining.slice(0, MAX_LINE_LENGTH));
+  remaining = remaining.slice(MAX_LINE_LENGTH);
+
+  // Continuation lines start with a space, so effective length is 74
+  while (remaining.length > 0) {
+    result.push(' ' + remaining.slice(0, MAX_LINE_LENGTH - 1));
+    remaining = remaining.slice(MAX_LINE_LENGTH - 1);
+  }
+
+  return result.join('\r\n');
 }

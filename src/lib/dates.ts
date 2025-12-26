@@ -28,7 +28,7 @@ export function parseScheduleInterval(schedule: string): number {
  * @param startDate - A known collection date (typically "next collection" from council site)
  * @param schedule - The schedule pattern (e.g., "Tuesday fortnightly")
  * @param months - How many months ahead to generate (default 3)
- * @returns Array of collection dates
+ * @returns Array of collection dates (only future dates)
  */
 export function generateCollectionDates(
   startDate: Date,
@@ -36,12 +36,19 @@ export function generateCollectionDates(
   months: number = 3
 ): Date[] {
   const interval = parseScheduleInterval(schedule);
-  const endDate = addMonths(startOfDay(new Date()), months);
+  const today = startOfDay(new Date());
+  const endDate = addMonths(today, months);
   const dates: Date[] = [];
 
   let current = startOfDay(startDate);
 
-  // Generate dates from startDate forward
+  // If start date is in the past, advance to the next occurrence
+  // that is today or in the future
+  while (isBefore(current, today)) {
+    current = addDays(current, interval);
+  }
+
+  // Generate dates from current forward
   while (isBefore(current, endDate) || isEqual(current, endDate)) {
     dates.push(new Date(current));
     current = addDays(current, interval);
@@ -98,10 +105,11 @@ export function formatDateKey(date: Date): string {
 
 /**
  * Format a date as YYYYMMDD for iCal
+ * Uses UTC methods to ensure consistent output regardless of server timezone
  */
 export function formatICalDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   return `${year}${month}${day}`;
 }

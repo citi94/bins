@@ -184,3 +184,25 @@ export async function getCollectionOverrides(uprn: string): Promise<CollectionOv
     detectedAt: new Date(row.detected_at),
   }));
 }
+
+/**
+ * Delete a subscription and all associated data by calendar token
+ */
+export async function deleteSubscriptionByToken(token: string): Promise<boolean> {
+  const sql = getSQL();
+
+  // First get the subscription to find the UPRN
+  const subscription = await getSubscriptionByToken(token);
+  if (!subscription) {
+    return false;
+  }
+
+  const { uprn } = subscription;
+
+  // Delete in order: overrides, collections, then subscription
+  await sql`DELETE FROM collection_overrides WHERE uprn = ${uprn}`;
+  await sql`DELETE FROM collections WHERE uprn = ${uprn}`;
+  await sql`DELETE FROM subscriptions WHERE calendar_token = ${token}`;
+
+  return true;
+}

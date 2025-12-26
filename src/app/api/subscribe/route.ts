@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSubscription, upsertCollections } from '@/lib/db';
 import { scrapePropertyCollections } from '@/lib/scraper';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import type { SubscribeRequest } from '@/types';
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const clientIP = getClientIP(request);
+  const rateLimit = checkRateLimit(`subscribe:${clientIP}`, RATE_LIMITS.subscribe);
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)),
+        },
+      }
+    );
+  }
+
   try {
     const body: SubscribeRequest = await request.json();
     const { uprn, address, postcode } = body;
@@ -11,6 +28,15 @@ export async function POST(request: NextRequest) {
     if (!uprn || !address || !postcode) {
       return NextResponse.json(
         { error: 'UPRN, address, and postcode are required' },
+        { status: 400 }
+      );
+    }
+
+    // Validate UPRN format (10-12 digit numeric string)
+    const uprnRegex = /^\d{10,12}$/;
+    if (!uprnRegex.test(uprn)) {
+      return NextResponse.json(
+        { error: 'Invalid UPRN format' },
         { status: 400 }
       );
     }

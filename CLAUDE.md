@@ -45,3 +45,26 @@ See `schema.sql`. Three tables:
 - `subscriptions` - property info + calendar token
 - `collections` - current schedule per service (refreshed daily)
 - `collection_overrides` - detected holiday adjustments
+
+## Outstanding Tasks (Dec 2025)
+
+See `SECURITY_REVIEW.md` for full details. Priority items:
+
+1. Add Privacy Policy page
+2. Add data deletion mechanism (GDPR right to erasure)
+3. Fix timezone handling (use explicit UK timezone in date parsing)
+4. Add rate limiting on API endpoints
+5. Hash UPRN in calendar event UIDs
+6. Add UPRN format validation (10-12 digit numeric)
+7. Truncate address in calendar name (postcode only)
+8. Add Terms of Service page
+9. Add iCal line folding (RFC 5545 - max 75 chars)
+10. Handle stale/past dates from council site
+
+## Future Enhancement: Apple Intelligence
+
+Apple Intelligence surfaces smart notifications from calendar events. To optimize:
+- Use actionable titles: "Put out recycling bin" not just "Recycling Collection"
+- Add helpful descriptions: "Remember to put your green bin out by 7am"
+- Add VALARM reminders (e.g., 8pm evening before)
+- Consider structured data format in descriptions for AI parsing

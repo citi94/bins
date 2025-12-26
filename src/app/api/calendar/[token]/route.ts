@@ -2,12 +2,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSubscriptionByToken, getCollections, getCollectionOverrides } from '@/lib/db';
 import { generateCollectionDates, formatDateKey } from '@/lib/dates';
 import { generateICalendar } from '@/lib/ical';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 import type { CalendarEvent } from '@/types';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  // Rate limiting
+  const clientIP = getClientIP(request);
+  const rateLimit = checkRateLimit(`calendar:${clientIP}`, RATE_LIMITS.calendar);
+
+  if (!rateLimit.success) {
+    return new NextResponse('Too many requests', {
+      status: 429,
+      headers: {
+        'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)),
+      },
+    });
+  }
+
   try {
     const { token } = await params;
 
@@ -73,8 +87,9 @@ export async function GET(
     }
 
     // Generate iCal content
+    // Use postcode only in calendar name to avoid exposing full address
     const icalContent = generateICalendar(serviceEvents, {
-      calendarName: `Bin Collection - ${subscription.address}`,
+      calendarName: `Bin Collection - ${subscription.postcode}`,
       uprn: subscription.uprn,
     });
 

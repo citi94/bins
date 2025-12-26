@@ -422,8 +422,13 @@ export default function Home() {
               No warranty is provided — always check official sources before putting bins out.
             </p>
           </div>
-          <p className="text-center text-slate-500">
+          <p className="text-center text-slate-500 mb-2">
             Calendar refreshes daily at 6am to detect schedule changes.
+          </p>
+          <p className="text-center text-slate-400">
+            <a href="/privacy" className="hover:text-slate-600 hover:underline">Privacy Policy</a>
+            {' · '}
+            <a href="/terms" className="hover:text-slate-600 hover:underline">Terms of Service</a>
           </p>
         </footer>
       </div>

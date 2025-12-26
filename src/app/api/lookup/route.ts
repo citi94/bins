@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { lookupAddresses } from '@/lib/scraper';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/rate-limit';
 
 // Dover District Council covers these postcode areas
 // CT13 (Sandwich), CT14 (Deal/Walmer), CT15, CT16, CT17 (Dover)
@@ -12,6 +13,22 @@ function isDoverDistrictPostcode(postcode: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const clientIP = getClientIP(request);
+  const rateLimit = checkRateLimit(`lookup:${clientIP}`, RATE_LIMITS.lookup);
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(Math.ceil((rateLimit.resetAt - Date.now()) / 1000)),
+        },
+      }
+    );
+  }
+
   try {
     const body = await request.json();
     const { postcode } = body;
