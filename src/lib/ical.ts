@@ -10,33 +10,15 @@ interface ICalOptions {
 }
 
 /**
- * Map service names to friendly bin names
- */
-const SERVICE_NAMES: Record<string, string> = {
-  'Refuse Collection': 'General Waste',
-  'Paper/Card Collection': 'Paper/Card',
-  'Recycling Collection': 'Recycling',
-  'Food Collection': 'Food',
-  'Garden Waste Collection': 'Garden Waste',
-};
-
-/**
- * Map service names to simple descriptions
+ * Map service names to simple descriptions for the event body
  */
 const SERVICE_DESCRIPTIONS: Record<string, string> = {
-  'Refuse Collection': 'General waste',
-  'Paper/Card Collection': 'Paper and card',
-  'Recycling Collection': 'Recycling',
-  'Food Collection': 'Food waste',
-  'Garden Waste Collection': 'Garden waste',
+  'Refuse Collection': 'General waste bin',
+  'Paper/Card Collection': 'Paper and card bin',
+  'Recycling Collection': 'Recycling bin',
+  'Food Collection': 'Food waste caddy',
+  'Garden Waste Collection': 'Garden waste bin',
 };
-
-/**
- * Get friendly name for a service
- */
-function getFriendlyName(serviceName: string): string {
-  return SERVICE_NAMES[serviceName] || serviceName.replace(' Collection', '');
-}
 
 /**
  * Generate an iCal calendar string from collection events
@@ -121,9 +103,10 @@ export function generateICalendar(
 /**
  * Generate a VEVENT block for a day's collections
  *
- * Events are categorized by main bin type for easy visual scanning:
- * - Recycling days: green color, title starts with "Recycling"
- * - General Waste days: gray color, title starts with "General Waste"
+ * Simple, clear titles:
+ * - "Recycling Day" for recycling weeks
+ * - "General Waste Day" for general waste weeks
+ * - Details of what to put out go in the description
  */
 function generateDayEvent(
   serviceNames: string[],
@@ -134,7 +117,11 @@ function generateDayEvent(
 ): string[] {
   const dateStr = formatICalDate(date);
   const nextDay = formatICalDate(addDays(date, 1));
-  const uid = generateEventUID('bins', date, uprn);
+
+  // Include filter in UID so each calendar stream has unique event IDs
+  // This prevents calendar apps from merging events across different subscriptions
+  const calendarType = filter || 'combined';
+  const uid = generateEventUID(calendarType, date, uprn);
 
   // Determine the "main" bin type for this day
   const hasRecycling = serviceNames.includes('Recycling Collection');
@@ -146,38 +133,21 @@ function generateDayEvent(
   let color: string;
 
   if (hasRecycling) {
-    mainType = 'Recycling';
+    mainType = 'Recycling Day';
     color = 'green';
   } else if (hasGeneralWaste) {
-    mainType = 'General Waste';
+    mainType = 'General Waste Day';
     color = 'gray';
   } else if (hasGardenWaste) {
-    mainType = 'Garden Waste';
+    mainType = 'Garden Waste Day';
     color = 'brown';
   } else {
     mainType = 'Bin Day';
     color = 'blue';
   }
 
-  // Get secondary bins (excluding the main type already shown)
-  const secondaryBins = serviceNames
-    .filter(name => {
-      if (hasRecycling && name === 'Recycling Collection') return false;
-      if (hasGeneralWaste && name === 'Refuse Collection') return false;
-      if (!hasRecycling && !hasGeneralWaste && hasGardenWaste && name === 'Garden Waste Collection') return false;
-      return true;
-    })
-    .map(getFriendlyName);
-
-  // Build summary: "Recycling: Paper/Card, Food" or "General Waste: Food"
-  let summary: string;
-  if (secondaryBins.length > 0) {
-    summary = hasOverride
-      ? `${mainType} (changed): ${secondaryBins.join(', ')}`
-      : `${mainType}: ${secondaryBins.join(', ')}`;
-  } else {
-    summary = hasOverride ? `${mainType} (changed)` : mainType;
-  }
+  // Simple summary - just the day type
+  const summary = hasOverride ? `${mainType} (changed)` : mainType;
 
   // Build description with all bin details
   const binDetails = serviceNames

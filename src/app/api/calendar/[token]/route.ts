@@ -26,8 +26,13 @@ export async function GET(
     const { token } = await params;
 
     // Check for filter query param (for separate colored calendars)
+    // Only accept valid filter values - anything else becomes null (combined calendar)
     const url = new URL(request.url);
-    const filter = url.searchParams.get('filter') as 'recycling' | 'general' | null;
+    const filterParam = url.searchParams.get('filter');
+    const filter: 'recycling' | 'general' | null =
+      filterParam === 'recycling' ? 'recycling' :
+      filterParam === 'general' ? 'general' :
+      null;
 
     // Get subscription
     const subscription = await getSubscriptionByToken(token);
