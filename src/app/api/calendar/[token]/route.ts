@@ -108,13 +108,22 @@ export async function GET(
     // Return iCal with proper headers
     // Use postcode in filename instead of UPRN to avoid property identification
     const safePostcode = subscription.postcode.replace(/\s+/g, '');
+
+    // Build filename based on filter
+    let filename = `bins-${safePostcode}.ics`;
+    if (filter === 'recycling') {
+      filename = `recycling-${safePostcode}.ics`;
+    } else if (filter === 'general') {
+      filename = `general-waste-${safePostcode}.ics`;
+    }
+
     return new NextResponse(icalContent, {
       status: 200,
       headers: {
         'Content-Type': 'text/calendar; charset=utf-8',
-        'Content-Disposition': `attachment; filename="bins-${safePostcode}.ics"`,
-        // Allow calendar apps to refresh periodically
-        'Cache-Control': 'public, max-age=3600', // 1 hour cache
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        // Short cache for calendar apps to pick up changes
+        'Cache-Control': 'public, max-age=1800', // 30 min cache
       },
     });
   } catch (error) {

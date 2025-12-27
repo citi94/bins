@@ -301,49 +301,49 @@ export default function Home() {
               </div>
 
               <div className="p-6 md:p-8 space-y-8">
-                {/* Add to Calendar button */}
+                {/* Two separate calendar buttons - primary option */}
                 <div>
-                  <a
-                    href={subscription.calendarUrl.replace('https://', 'webcal://')}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors text-lg"
-                  >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Add to Calendar
-                  </a>
+                  <p className="text-sm text-slate-600 mb-3 text-center">Add both calendars and colour them however you like:</p>
+                  <div className="flex gap-3">
+                    <a
+                      href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=recycling'}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
+                    >
+                      <span className="text-xl">♻️</span>
+                      <span>Recycling</span>
+                    </a>
+                    <a
+                      href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=general'}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors"
+                    >
+                      <span className="text-xl">🗑️</span>
+                      <span>General Waste</span>
+                    </a>
+                  </div>
                   <p className="text-sm text-slate-500 mt-2 text-center">
-                    Works with Apple Calendar, Outlook, and most calendar apps
+                    Click both buttons to add separate calendars
                   </p>
                 </div>
 
-                {/* Colored calendar options */}
+                {/* Combined calendar option */}
                 <div>
                   <details className="group">
                     <summary className="flex items-center justify-between cursor-pointer text-sm text-slate-600 hover:text-slate-900">
-                      <span>Want different colours for recycling vs general waste?</span>
+                      <span>Or add everything in one calendar</span>
                       <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     </summary>
-                    <div className="mt-3 space-y-2">
-                      <p className="text-sm text-slate-600 mb-3">Add these two calendars separately and colour them however you like:</p>
-                      <div className="flex gap-2">
-                        <a
-                          href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=recycling'}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
-                        >
-                          <span>♻️</span>
-                          Recycling
-                        </a>
-                        <a
-                          href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=general'}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors text-sm"
-                        >
-                          <span>🗑️</span>
-                          General Waste
-                        </a>
-                      </div>
+                    <div className="mt-3">
+                      <a
+                        href={subscription.calendarUrl.replace('https://', 'webcal://')}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Add Combined Calendar
+                      </a>
                     </div>
                   </details>
                 </div>
