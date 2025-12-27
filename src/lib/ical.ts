@@ -6,6 +6,7 @@ import type { CalendarEvent } from '@/types';
 interface ICalOptions {
   calendarName: string;
   uprn: string;
+  filter?: 'recycling' | 'general' | null;
 }
 
 /**
@@ -82,12 +83,23 @@ export function generateICalendar(
   const hasFood = events.some(e => e.serviceName === 'Food Collection');
 
   // Generate one event per day
-  for (const [dateKey, dayEvent] of eventsByDate) {
+  for (const [, dayEvent] of eventsByDate) {
     const nonFoodServices = dayEvent.services.filter(s => s !== 'Food Collection');
 
     // Skip food-only days - food is always collected alongside other bins
     if (nonFoodServices.length === 0) {
       continue;
+    }
+
+    // Apply filter if specified (for separate colored calendars)
+    if (options.filter === 'recycling') {
+      if (!dayEvent.services.includes('Recycling Collection')) {
+        continue; // Skip non-recycling days
+      }
+    } else if (options.filter === 'general') {
+      if (!dayEvent.services.includes('Refuse Collection')) {
+        continue; // Skip non-general-waste days
+      }
     }
 
     // Food goes out every week, so add it to any collection day that's missing it
@@ -97,7 +109,7 @@ export function generateICalendar(
       dayEvent.services.push('Food Collection');
     }
 
-    lines.push(...generateDayEvent(dayEvent.services, dayEvent.date, dayEvent.hasOverride, options.uprn));
+    lines.push(...generateDayEvent(dayEvent.services, dayEvent.date, dayEvent.hasOverride, options.uprn, options.filter));
   }
 
   lines.push('END:VCALENDAR');
@@ -117,7 +129,8 @@ function generateDayEvent(
   serviceNames: string[],
   date: Date,
   hasOverride: boolean,
-  uprn: string
+  uprn: string,
+  filter?: 'recycling' | 'general' | null
 ): string[] {
   const dateStr = formatICalDate(date);
   const nextDay = formatICalDate(addDays(date, 1));
@@ -171,9 +184,16 @@ function generateDayEvent(
     .map(name => SERVICE_DESCRIPTIONS[name] || name)
     .join('\n');
 
-  const description = hasOverride
-    ? `Put out:\n${binDetails}\n\nNote: Date changed due to bank holiday.`
-    : `Put out:\n${binDetails}`;
+  let description = `Put out:\n${binDetails}`;
+
+  if (hasOverride) {
+    description += '\n\nNote: Date changed due to bank holiday.';
+  }
+
+  // Add tip about colored calendars for combined calendar subscribers
+  if (!filter) {
+    description += '\n\nTip: Want different colours for recycling vs general waste? Visit doverbins.netlify.app to add separate calendars.';
+  }
 
   return [
     'BEGIN:VEVENT',

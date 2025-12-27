@@ -317,6 +317,37 @@ export default function Home() {
                   </p>
                 </div>
 
+                {/* Colored calendar options */}
+                <div>
+                  <details className="group">
+                    <summary className="flex items-center justify-between cursor-pointer text-sm text-slate-600 hover:text-slate-900">
+                      <span>Want different colours for recycling vs general waste?</span>
+                      <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </summary>
+                    <div className="mt-3 space-y-2">
+                      <p className="text-sm text-slate-600 mb-3">Add these two calendars separately and colour them however you like:</p>
+                      <div className="flex gap-2">
+                        <a
+                          href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=recycling'}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors text-sm"
+                        >
+                          <span>♻️</span>
+                          Recycling
+                        </a>
+                        <a
+                          href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=general'}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors text-sm"
+                        >
+                          <span>🗑️</span>
+                          General Waste
+                        </a>
+                      </div>
+                    </div>
+                  </details>
+                </div>
+
                 {/* Manual URL for Google Calendar etc */}
                 <div>
                   <details className="group">

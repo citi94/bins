@@ -25,6 +25,10 @@ export async function GET(
   try {
     const { token } = await params;
 
+    // Check for filter query param (for separate colored calendars)
+    const url = new URL(request.url);
+    const filter = url.searchParams.get('filter') as 'recycling' | 'general' | null;
+
     // Get subscription
     const subscription = await getSubscriptionByToken(token);
 
@@ -88,9 +92,17 @@ export async function GET(
 
     // Generate iCal content
     // Use postcode only in calendar name to avoid exposing full address
+    let calendarName = `Bin Collection - ${subscription.postcode}`;
+    if (filter === 'recycling') {
+      calendarName = `Recycling - ${subscription.postcode}`;
+    } else if (filter === 'general') {
+      calendarName = `General Waste - ${subscription.postcode}`;
+    }
+
     const icalContent = generateICalendar(serviceEvents, {
-      calendarName: `Bin Collection - ${subscription.postcode}`,
+      calendarName,
       uprn: subscription.uprn,
+      filter,
     });
 
     // Return iCal with proper headers
