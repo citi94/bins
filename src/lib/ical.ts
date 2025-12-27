@@ -140,14 +140,27 @@ function generateDayEvent(
     color = 'gray';
   }
 
-  // Build title listing all bins: "Recycling, Paper/Card, Food - Bin Day"
-  const binNames = serviceNames
+  // Build title with main bin first: "Bins - Recycling, Paper/Card, Food"
+  // Sort so the main type (Recycling or General Waste) comes first
+  const sortOrder: Record<string, number> = {
+    'Recycling Collection': 1,
+    'Refuse Collection': 1,
+    'Paper/Card Collection': 2,
+    'Garden Waste Collection': 3,
+    'Food Collection': 4,  // Food last as it's every week
+  };
+
+  const sortedServices = [...serviceNames].sort((a, b) => {
+    return (sortOrder[a] || 99) - (sortOrder[b] || 99);
+  });
+
+  const binNames = sortedServices
     .map(name => SHORT_NAMES[name] || name.replace(' Collection', ''))
     .join(', ');
 
-  let summary = `${binNames} - Bin Day`;
+  let summary = `Bins - ${binNames}`;
   if (hasOverride) {
-    summary = `${binNames} - Bin Day (changed)`;
+    summary = `Bins - ${binNames} (changed)`;
   }
 
   // Build description with full details
