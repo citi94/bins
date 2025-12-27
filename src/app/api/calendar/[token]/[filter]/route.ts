@@ -7,7 +7,7 @@ import type { CalendarEvent } from '@/types';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ token: string }> }
+  { params }: { params: Promise<{ token: string; filter: string }> }
 ) {
   // Rate limiting
   const clientIP = getClientIP(request);
@@ -23,7 +23,13 @@ export async function GET(
   }
 
   try {
-    const { token } = await params;
+    const { token, filter: filterParam } = await params;
+
+    // Validate filter - only accept 'recycling' or 'general'
+    if (filterParam !== 'recycling' && filterParam !== 'general') {
+      return new NextResponse('Invalid filter. Use "recycling" or "general".', { status: 400 });
+    }
+    const filter: 'recycling' | 'general' = filterParam;
 
     // Get subscription
     const subscription = await getSubscriptionByToken(token);
@@ -52,32 +58,21 @@ export async function GET(
     const serviceEvents: { serviceName: string; events: CalendarEvent[] }[] = [];
 
     for (const collection of collections) {
-      // Generate dates for the next 3 months based on pattern
-      // This now returns { date, isOverride } with proper pattern-based calculation
       const generatedDates = generateCollectionDates(
         collection.nextCollection,
         collection.schedule,
         3
       );
 
-      // Apply any additional overrides from database (for future holiday shifts
-      // detected by daily refresh that aren't reflected in nextCollection yet)
       const serviceOverrides = overrideMap.get(collection.serviceName) || new Map();
       const events: CalendarEvent[] = generatedDates.map(item => {
         const dateKey = formatDateKey(item.date);
         const dbOverride = serviceOverrides.get(dateKey);
 
         if (dbOverride) {
-          return {
-            date: dbOverride,
-            isOverride: true,
-          };
+          return { date: dbOverride, isOverride: true };
         }
-
-        return {
-          date: item.date,
-          isOverride: item.isOverride,
-        };
+        return { date: item.date, isOverride: item.isOverride };
       });
 
       serviceEvents.push({
@@ -86,22 +81,27 @@ export async function GET(
       });
     }
 
-    // Generate iCal content (combined calendar - no filter)
-    const calendarName = `Bin Collection - ${subscription.postcode}`;
+    // Generate iCal content
+    const calendarName = filter === 'recycling'
+      ? `Recycling Bins - ${subscription.postcode}`
+      : `General Waste Bins - ${subscription.postcode}`;
 
     const icalContent = generateICalendar(serviceEvents, {
       calendarName,
       uprn: subscription.uprn,
-      filter: null,
+      filter,
     });
 
     const safePostcode = subscription.postcode.replace(/\s+/g, '');
+    const filename = filter === 'recycling'
+      ? `recycling-${safePostcode}.ics`
+      : `general-waste-${safePostcode}.ics`;
 
     return new NextResponse(icalContent, {
       status: 200,
       headers: {
         'Content-Type': 'text/calendar; charset=utf-8',
-        'Content-Disposition': `attachment; filename="bins-${safePostcode}.ics"`,
+        'Content-Disposition': `attachment; filename="${filename}"`,
         'Cache-Control': 'public, max-age=1800',
       },
     });

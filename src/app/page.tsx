@@ -306,14 +306,14 @@ export default function Home() {
                   <p className="text-sm text-slate-600 mb-3 text-center">Add both calendars and colour them however you like:</p>
                   <div className="flex gap-3">
                     <a
-                      href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=recycling'}
+                      href={subscription.calendarUrl.replace('https://', 'webcal://') + '/recycling'}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
                     >
                       <span className="text-xl">♻️</span>
                       <span>Recycling</span>
                     </a>
                     <a
-                      href={subscription.calendarUrl.replace('https://', 'webcal://') + '?filter=general'}
+                      href={subscription.calendarUrl.replace('https://', 'webcal://') + '/general'}
                       className="flex-1 flex items-center justify-center gap-2 px-4 py-4 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-lg transition-colors"
                     >
                       <span className="text-xl">🗑️</span>

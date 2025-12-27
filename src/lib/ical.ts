@@ -10,9 +10,20 @@ interface ICalOptions {
 }
 
 /**
- * Map service names to simple descriptions for the event body
+ * Map service names to short friendly names for titles
  */
-const SERVICE_DESCRIPTIONS: Record<string, string> = {
+const SHORT_NAMES: Record<string, string> = {
+  'Refuse Collection': 'General Waste',
+  'Paper/Card Collection': 'Paper/Card',
+  'Recycling Collection': 'Recycling',
+  'Food Collection': 'Food',
+  'Garden Waste Collection': 'Garden',
+};
+
+/**
+ * Map service names to descriptions for the event body
+ */
+const DESCRIPTIONS: Record<string, string> = {
   'Refuse Collection': 'General waste bin',
   'Paper/Card Collection': 'Paper and card bin',
   'Recycling Collection': 'Recycling bin',
@@ -75,18 +86,18 @@ export function generateICalendar(
 
     // Apply filter if specified (for separate colored calendars)
     if (options.filter === 'recycling') {
+      // Only include days that have Recycling Collection
       if (!dayEvent.services.includes('Recycling Collection')) {
-        continue; // Skip non-recycling days
+        continue;
       }
     } else if (options.filter === 'general') {
+      // Only include days that have Refuse Collection (general waste)
       if (!dayEvent.services.includes('Refuse Collection')) {
-        continue; // Skip non-general-waste days
+        continue;
       }
     }
 
     // Food goes out every week, so add it to any collection day that's missing it
-    // (This handles the case where food's calculated dates don't align with other bins
-    // due to holiday-adjusted start dates)
     if (hasFood && !dayEvent.services.includes('Food Collection')) {
       dayEvent.services.push('Food Collection');
     }
@@ -96,17 +107,13 @@ export function generateICalendar(
 
   lines.push('END:VCALENDAR');
 
-  // Fold lines that exceed 75 bytes
   return lines.map(foldLine).join('\r\n');
 }
 
 /**
  * Generate a VEVENT block for a day's collections
  *
- * Simple, clear titles:
- * - "Recycling Day" for recycling weeks
- * - "General Waste Day" for general waste weeks
- * - Details of what to put out go in the description
+ * Title format: "Recycling, Paper/Card, Food - Bin Day"
  */
 function generateDayEvent(
   serviceNames: string[],
@@ -119,39 +126,33 @@ function generateDayEvent(
   const nextDay = formatICalDate(addDays(date, 1));
 
   // Include filter in UID so each calendar stream has unique event IDs
-  // This prevents calendar apps from merging events across different subscriptions
   const calendarType = filter || 'combined';
   const uid = generateEventUID(calendarType, date, uprn);
 
-  // Determine the "main" bin type for this day
+  // Determine color based on primary bin type
   const hasRecycling = serviceNames.includes('Recycling Collection');
   const hasGeneralWaste = serviceNames.includes('Refuse Collection');
-  const hasGardenWaste = serviceNames.includes('Garden Waste Collection');
 
-  // Set main type and color based on primary bin
-  let mainType: string;
-  let color: string;
-
+  let color = 'blue';
   if (hasRecycling) {
-    mainType = 'Recycling Day';
     color = 'green';
   } else if (hasGeneralWaste) {
-    mainType = 'General Waste Day';
     color = 'gray';
-  } else if (hasGardenWaste) {
-    mainType = 'Garden Waste Day';
-    color = 'brown';
-  } else {
-    mainType = 'Bin Day';
-    color = 'blue';
   }
 
-  // Simple summary - just the day type
-  const summary = hasOverride ? `${mainType} (changed)` : mainType;
+  // Build title listing all bins: "Recycling, Paper/Card, Food - Bin Day"
+  const binNames = serviceNames
+    .map(name => SHORT_NAMES[name] || name.replace(' Collection', ''))
+    .join(', ');
 
-  // Build description with all bin details
+  let summary = `${binNames} - Bin Day`;
+  if (hasOverride) {
+    summary = `${binNames} - Bin Day (changed)`;
+  }
+
+  // Build description with full details
   const binDetails = serviceNames
-    .map(name => SERVICE_DESCRIPTIONS[name] || name)
+    .map(name => DESCRIPTIONS[name] || name)
     .join('\n');
 
   let description = `Put out:\n${binDetails}`;
@@ -160,9 +161,8 @@ function generateDayEvent(
     description += '\n\nNote: Date changed due to bank holiday.';
   }
 
-  // Add tip about colored calendars for combined calendar subscribers
   if (!filter) {
-    description += '\n\nTip: Want different colours for recycling vs general waste? Visit doverbins.netlify.app to add separate calendars.';
+    description += '\n\nTip: Want different colours for recycling vs general waste days? Visit doverbins.netlify.app to add separate calendars.';
   }
 
   return [
@@ -174,22 +174,19 @@ function generateDayEvent(
     `SUMMARY:${escapeICalText(summary)}`,
     `DESCRIPTION:${escapeICalText(description)}`,
     `COLOR:${color}`,
-    'TRANSP:TRANSPARENT', // Show as free (all-day event)
+    'TRANSP:TRANSPARENT',
     'END:VEVENT',
   ];
 }
 
 /**
  * Generate a unique event ID with hashed UPRN for privacy
- * The hash ensures UIDs remain stable (same UPRN = same hash) while
- * not exposing the actual property identifier
  */
-function generateEventUID(serviceName: string, date: Date, uprn: string): string {
-  const serviceKey = serviceName.toLowerCase().replace(/[^a-z]/g, '');
+function generateEventUID(calendarType: string, date: Date, uprn: string): string {
+  const typeKey = calendarType.toLowerCase().replace(/[^a-z]/g, '');
   const dateKey = formatICalDate(date);
-  // Hash the UPRN to avoid exposing property identifiers
   const uprnHash = createHash('sha256').update(uprn).digest('hex').substring(0, 12);
-  return `${serviceKey}-${uprnHash}-${dateKey}@doverbins.app`;
+  return `${typeKey}-${uprnHash}-${dateKey}@doverbins.app`;
 }
 
 /**
@@ -212,16 +209,10 @@ function escapeICalText(text: string): string {
 
 /**
  * Fold long lines according to RFC 5545
- * Lines should be no longer than 75 octets (bytes), excluding the line break.
- * Folding is done by inserting a CRLF followed by a single whitespace.
- *
- * This implementation properly counts bytes, not characters, and avoids
- * splitting multi-byte UTF-8 characters.
  */
 function foldLine(line: string): string {
   const MAX_BYTES = 75;
 
-  // Quick check: if ASCII-only and short enough, return as-is
   const lineBytes = Buffer.byteLength(line, 'utf-8');
   if (lineBytes <= MAX_BYTES) {
     return line;
@@ -234,12 +225,11 @@ function foldLine(line: string): string {
 
   for (const char of line) {
     const charBytes = Buffer.byteLength(char, 'utf-8');
-    const maxForThisLine = isFirstLine ? MAX_BYTES : MAX_BYTES - 1; // -1 for leading space
+    const maxForThisLine = isFirstLine ? MAX_BYTES : MAX_BYTES - 1;
 
     if (currentBytes + charBytes > maxForThisLine) {
-      // Start a new line
       result.push(currentLine);
-      currentLine = ' ' + char; // Continuation lines start with space
+      currentLine = ' ' + char;
       currentBytes = 1 + charBytes;
       isFirstLine = false;
     } else {
