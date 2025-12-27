@@ -108,6 +108,10 @@ export function generateICalendar(
 
 /**
  * Generate a VEVENT block for a day's collections
+ *
+ * Events are categorized by main bin type for easy visual scanning:
+ * - Recycling days: green color, title starts with "Recycling"
+ * - General Waste days: gray color, title starts with "General Waste"
  */
 function generateDayEvent(
   serviceNames: string[],
@@ -119,13 +123,50 @@ function generateDayEvent(
   const nextDay = formatICalDate(addDays(date, 1));
   const uid = generateEventUID('bins', date, uprn);
 
-  // Build summary: "Bin Day: Recycling, General Waste, Food"
-  const friendlyNames = serviceNames.map(getFriendlyName);
-  const summary = hasOverride
-    ? `Bin Day (changed): ${friendlyNames.join(', ')}`
-    : `Bin Day: ${friendlyNames.join(', ')}`;
+  // Determine the "main" bin type for this day
+  const hasRecycling = serviceNames.includes('Recycling Collection');
+  const hasGeneralWaste = serviceNames.includes('Refuse Collection');
+  const hasGardenWaste = serviceNames.includes('Garden Waste Collection');
 
-  // Build description with bin details
+  // Set main type and color based on primary bin
+  let mainType: string;
+  let color: string;
+
+  if (hasRecycling) {
+    mainType = 'Recycling';
+    color = 'green';
+  } else if (hasGeneralWaste) {
+    mainType = 'General Waste';
+    color = 'gray';
+  } else if (hasGardenWaste) {
+    mainType = 'Garden Waste';
+    color = 'brown';
+  } else {
+    mainType = 'Bin Day';
+    color = 'blue';
+  }
+
+  // Get secondary bins (excluding the main type already shown)
+  const secondaryBins = serviceNames
+    .filter(name => {
+      if (hasRecycling && name === 'Recycling Collection') return false;
+      if (hasGeneralWaste && name === 'Refuse Collection') return false;
+      if (!hasRecycling && !hasGeneralWaste && hasGardenWaste && name === 'Garden Waste Collection') return false;
+      return true;
+    })
+    .map(getFriendlyName);
+
+  // Build summary: "Recycling: Paper/Card, Food" or "General Waste: Food"
+  let summary: string;
+  if (secondaryBins.length > 0) {
+    summary = hasOverride
+      ? `${mainType} (changed): ${secondaryBins.join(', ')}`
+      : `${mainType}: ${secondaryBins.join(', ')}`;
+  } else {
+    summary = hasOverride ? `${mainType} (changed)` : mainType;
+  }
+
+  // Build description with all bin details
   const binDetails = serviceNames
     .map(name => SERVICE_DESCRIPTIONS[name] || name)
     .join('\n');
@@ -142,6 +183,7 @@ function generateDayEvent(
     `DTEND;VALUE=DATE:${nextDay}`,
     `SUMMARY:${escapeICalText(summary)}`,
     `DESCRIPTION:${escapeICalText(description)}`,
+    `COLOR:${color}`,
     'TRANSP:TRANSPARENT', // Show as free (all-day event)
     'END:VEVENT',
   ];
